@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "homepage": "https://github.com/GeoVision-Labs/geolibre-india/f1",
+  "homepage": "https://joshuamamidisetti.github.io/ey-govt-saidabad-viewer",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
