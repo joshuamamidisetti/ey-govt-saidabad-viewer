@@ -15,5 +15,6 @@ export type LayerDefinition = {
     sourceId: string;
     geometryType: LayerGeometryType;
     visible: boolean;
+    filter?: unknown[];
     style: LayerStyle;
 }

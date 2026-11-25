@@ -2,14 +2,14 @@ import { useEffect, useState, useRef } from "react";
 import * as maplibregl from 'maplibre-gl';
 import "maplibre-gl/dist/maplibre-gl.css";
 import workerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url';
-import utilityNetwork from '../../data/utility-network.json';
+import saidabad from '../../data/saidabad.json';
 import { GeoJSONDataSource } from "../../services/dataSources/GeoJSONDataSource";
 import { bbox } from "@turf/bbox";
 import home from "/home.png";
 import LocateControl from "./LocateControl";
 import type { IdentifyResult } from "../../types/IdentifyResult";
 import MeasurementTool from '../MeasurementControl/MesurementTool';
-import { utilityLayers } from "../../config/layers";
+import { saidabadLayers } from "../../config/layers";
 
 maplibregl.setWorkerUrl(workerUrl);
 
@@ -24,9 +24,9 @@ type MapComponentProps = {
 	onSelectFeature?: (selectFn: (feature: IdentifyResult) => void) => void;
 };
 
-const utilityNetworkDataSource = new GeoJSONDataSource(
-			"utility-network",
-			utilityNetwork as GeoJSON.FeatureCollection,
+const saidabadDataSource = new GeoJSONDataSource(
+			"saidabad",
+			saidabad as GeoJSON.FeatureCollection,
 		);
 
 class HomeControl implements
@@ -50,7 +50,7 @@ class HomeControl implements
 
 		button.onclick = () => {
 			if (!this.map) return;
-			const bounds = bbox(utilityNetwork as any) as [
+			const bounds = bbox(saidabad as any) as [
 				number,
 				number,
 				number,
@@ -96,7 +96,7 @@ function MapComponent({ onFeatureSelect, onMapReady,
 
 		if (selectedFeatureId.current !== null) {
 			map.setFeatureState({
-				source: "utility-network",
+				source: "saidabad",
 				id: selectedFeatureId.current,
 			},
 				{
@@ -107,7 +107,7 @@ function MapComponent({ onFeatureSelect, onMapReady,
 		if (previousSelectedId !== null) {
 			map.setFeatureState(
 				{
-					source: "utility-network",
+					source: "saidabad",
 					id: previousSelectedId,
 				},
 				{
@@ -116,11 +116,11 @@ function MapComponent({ onFeatureSelect, onMapReady,
 			);
 		}
 
-		selectedFeatureId.current = feature.properties?.assetId;
+		selectedFeatureId.current = feature.properties?.fid;
 		if (selectedFeatureId.current !== null) {
 			map.setFeatureState(
 				{
-					source: "utility-network",
+					source: "saidabad",
 					id: selectedFeatureId.current,
 				},
 				{
@@ -179,8 +179,8 @@ function MapComponent({ onFeatureSelect, onMapReady,
 		const map = mapRef.current;
 
 		if (!map || selectedFeatureId.current === null) { return; }
-		const feature = utilityNetworkDataSource.getData().features.find(
-			(item) => item.properties?.assetId === selectedFeatureId.current
+		const feature = saidabadDataSource.getData().features.find(
+			(item) => item.properties?.fid === selectedFeatureId.current
 		);
 		if (!feature) { return; }
 		zoomToFeature(map, feature);
@@ -190,7 +190,7 @@ function MapComponent({ onFeatureSelect, onMapReady,
 		if (selectedFeatureId.current !== null) {
 			map.setFeatureState(
 				{
-					source: "utility-network",
+					source: "saidabad",
 					id: selectedFeatureId.current,
 				},
 				{
@@ -212,7 +212,7 @@ function MapComponent({ onFeatureSelect, onMapReady,
 		if (hoveredFeatureId.current !== undefined) {
 			map.setFeatureState(
 				{
-					source: "utility-network",
+					source: "saidabad",
 					id: hoveredFeatureId.current,
 				},
 				{
@@ -228,7 +228,7 @@ function MapComponent({ onFeatureSelect, onMapReady,
 
 		map.setFeatureState(
 			{
-				source: "utility-network",
+				source: "saidabad",
 				id: hoveredFeature.id,
 			},
 			{
@@ -255,8 +255,8 @@ function MapComponent({ onFeatureSelect, onMapReady,
 		const map = new maplibregl.Map({
 			container: mapContainer.current,
 			style: "https://demotiles.maplibre.org/style.json",
-			center: [83.2185, 17.6868],
-			zoom: 10,
+			center: [78.5135, 17.3635],
+			zoom: 14,
 		})
 
 		mapRef.current = map;
@@ -345,18 +345,18 @@ function MapComponent({ onFeatureSelect, onMapReady,
 		// 	}
 		// };
 
-		const addUtilityLayers = () => {
+		const addSaidabadLayers = () => {
 
-			if (!map.getSource("utility-network")) {
-				map.addSource("utility-network", {
+			if (!map.getSource("saidabad")) {
+				map.addSource("saidabad", {
 					type: "geojson",
-					data: utilityNetworkDataSource.getData(),
-					promoteId: "assetId",
+					data: saidabadDataSource.getData(),
+					promoteId: "fid",
 				});
 			}
 
 			const addConfiguredLayer = (
-				layer: (typeof utilityLayers)[number]
+				layer: (typeof saidabadLayers)[number]
 			) => {
 
 				if (map.getLayer(layer.id)) {
@@ -370,7 +370,7 @@ function MapComponent({ onFeatureSelect, onMapReady,
 							id: layer.id,
 							type: "circle",
 							source: layer.sourceId,
-							filter: ["==", ["geometry-type"], "Point"],
+							filter: layer.filter as any,
 							paint: layer.style.paint,
 							layout: {
 								...layer.style.layout,
@@ -386,7 +386,7 @@ function MapComponent({ onFeatureSelect, onMapReady,
 							id: layer.id,
 							type: "line",
 							source: layer.sourceId,
-							filter: ["==", ["geometry-type"], "LineString"],
+							filter: layer.filter as any,
 							paint: layer.style.paint,
 							layout: {
 								...layer.style.layout,
@@ -402,7 +402,7 @@ function MapComponent({ onFeatureSelect, onMapReady,
 							id: layer.id,
 							type: "fill",
 							source: layer.sourceId,
-							filter: ["==", ["geometry-type"], "Polygon"],
+							filter: layer.filter as any,
 							paint: layer.style.paint,
 							layout: {
 								...layer.style.layout,
@@ -415,16 +415,51 @@ function MapComponent({ onFeatureSelect, onMapReady,
 				}
 			};
 
-			utilityLayers.forEach(addConfiguredLayer);
+			saidabadLayers.forEach(addConfiguredLayer);
+
+			// Empty buffer source/layer used by the accessibility analysis (updated via setData).
+			if (!map.getSource("analysis-buffer")) {
+				map.addSource("analysis-buffer", {
+					type: "geojson",
+					data: { type: "FeatureCollection", features: [] },
+				});
+			}
+			if (!map.getLayer("analysis-buffer-fill")) {
+				map.addLayer({
+					id: "analysis-buffer-fill",
+					type: "fill",
+					source: "analysis-buffer",
+					paint: {
+						"fill-color": "#1976d2",
+						"fill-opacity": 0.18,
+					},
+				});
+			}
+			if (!map.getLayer("analysis-buffer-line")) {
+				map.addLayer({
+					id: "analysis-buffer-line",
+					type: "line",
+					source: "analysis-buffer",
+					paint: {
+						"line-color": "#d50000",
+						"line-width": 3,
+						"line-dasharray": [2, 1],
+					},
+				});
+			}
 		};
 
 
 		map.on("load", () => {
 
+			// Frame the Saidabad ward on startup (same bbox the Home control uses).
+			const b = bbox(saidabad as any) as [number, number, number, number];
+			map.fitBounds([[b[0], b[1]], [b[2], b[3]]], { padding: 40, duration: 0 });
+
 			onMapReady?.(map);
 			onSelectFeature?.((feature: IdentifyResult) => {
-				const sourceFeature = utilityNetwork.features.find(
-					(item) => item.properties?.assetId === feature.id
+				const sourceFeature = saidabad.features.find(
+					(item) => item.properties?.fid === feature.id
 				);
 				if (!sourceFeature) { return; }
 
@@ -433,9 +468,10 @@ function MapComponent({ onFeatureSelect, onMapReady,
 			map.on("click", (event) => {
 				const features = map.queryRenderedFeatures(event.point, {
 					layers: [
-						"utility-points",
-						"power-lines",
-						"service-areas",
+						"saidabad-buildings",
+						"saidabad-slums",
+						"saidabad-roads",
+						"saidabad-boundary",
 					],
 				});
 
@@ -468,7 +504,7 @@ function MapComponent({ onFeatureSelect, onMapReady,
 
 		});
 
-		map.on("style.load", () => { addUtilityLayers(); });
+		map.on("style.load", () => { addSaidabadLayers(); });
 
 		return () => {
 			map.remove();
@@ -485,11 +521,13 @@ function MapComponent({ onFeatureSelect, onMapReady,
 
 		const search = searchValue.trim().toLowerCase();
 
-		const feature = utilityNetworkDataSource.getData().features.find((f) => {
-			const assetId = f.properties?.assetId;
+		const feature = saidabadDataSource.getData().features.find((f) => {
+			const label = f.properties?.label;
+			const fid = f.properties?.fid;
 
 			return (
-				typeof assetId === "string" && assetId.toLowerCase().includes(search)
+				(typeof label === "string" && label.toLowerCase().includes(search)) ||
+				(typeof fid === "string" && fid.toLowerCase() === search)
 			);
 		});
 
@@ -509,7 +547,7 @@ function MapComponent({ onFeatureSelect, onMapReady,
 
 
 	return (
-		<div style={{ position: "fixed", inset: 0, width: "100%", height: "100dvh", overflow: "hidden" }} >
+		<div style={{ position: "absolute", inset: 0, width: "100%", height: "100%", overflow: "hidden" }} >
 			<div ref={mapContainer} style={{ width: "100%", height: "100%" }} />
 			{coordinates && (
 				<div

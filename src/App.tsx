@@ -5,6 +5,9 @@ import LayerControl from "./components/LayerControl/LayerControl";
 import type * as maplibregl from "maplibre-gl";
 import Search from "./components/Search/Search";
 import BasemapControl from "./components/BasemapControl/BasemapControl";
+import FilterControl from "./components/FilterControl/FilterControl";
+import LegendControl from "./components/LegendControl/LegendControl";
+import AnalysisControl from "./components/AnalysisControl/AnalysisControl";
 import type { IdentifyResult } from "./types/IdentifyResult";
 import IdentifyResults from "./components/IdentifyResults/IdentifyResult";
 
@@ -18,6 +21,10 @@ function App() {
         const [ selectMapFeature, setSelectMapFeature ] = useState<((feature: IdentifyResult) => void) | null>(null);
         const [identifyResults, setIdentifyResults] = useState<IdentifyResult[]>([]);
         const [hoveredFeature, setHoveredFeature] = useState<IdentifyResult | null>(null);
+        const [activePanel, setActivePanel] = useState<string | null>(null);
+
+        const togglePanel = (name: string) =>
+                setActivePanel((current) => (current === name ? null : name));
 
         const handleSearch = (value: string) => {
                 console.log("Searching for: ", value);
@@ -37,8 +44,26 @@ function App() {
         }
 
         return (
-                <div style={{ width: "100vw", height: "100vh", position: "relative" }}>
-                        <MapComponent 
+                <div style={{ display: "flex", flexDirection: "column", width: "100vw", height: "100vh" }}>
+                        <header style={{
+                                flex: "0 0 auto",
+                                height: "46px",
+                                background: "linear-gradient(90deg, #0d47a1, #1976d2)",
+                                color: "#ffffff",
+                                fontWeight: 700,
+                                fontSize: "16px",
+                                letterSpacing: "0.3px",
+                                display: "flex",
+                                alignItems: "center",
+                                padding: "0 20px",
+                                fontFamily: "Arial",
+                                boxShadow: "0 2px 6px rgba(0,0,0,0.25)",
+                                zIndex: 20,
+                        }}>
+                                Saidabad Government Land &amp; Building GIS Viewer
+                        </header>
+                        <div style={{ position: "relative", flex: "1 1 auto", overflow: "hidden" }}>
+                        <MapComponent
                                 onFeatureSelect={(feature) => {
                                         setSelectedFeature(feature);
                                         setIdentifyResults([]);
@@ -85,9 +110,13 @@ function App() {
                                         }} onCopyfeatureId={copyFeatureId}
                                         />)
                         }
-                        <LayerControl map={map} />
                         <Search onSearch={handleSearch} />
-                        <BasemapControl map={map} />
+                        <LayerControl map={map} open={activePanel === "layers"} onToggle={() => togglePanel("layers")} />
+                        <BasemapControl map={map} open={activePanel === "basemap"} onToggle={() => togglePanel("basemap")} />
+                        <FilterControl map={map} open={activePanel === "filter"} onToggle={() => togglePanel("filter")} />
+                        <LegendControl map={map} open={activePanel === "legend"} onToggle={() => togglePanel("legend")} />
+                        <AnalysisControl map={map} selectedFeature={selectedFeature} open={activePanel === "analysis"} onToggle={() => togglePanel("analysis")} />
+                        </div>
                 </div>
         )
 }

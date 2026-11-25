@@ -1,7 +1,10 @@
 import type * as maplibregl from "maplibre-gl";
+import { toolContainer, toolButton, toolFlyout } from "../toolStyles";
 
 type BasemapControlProps = {
         map: maplibregl.Map | null;
+        open: boolean;
+        onToggle: () => void;
 };
 
 const basemaps = {
@@ -11,41 +14,34 @@ const basemaps = {
         Light: "https://tiles.openfreemap.org/styles/light",
 };
 
-function BasemapControl({map}: BasemapControlProps) {
-        
+function BasemapControl({ map, open, onToggle }: BasemapControlProps) {
+
         const changeBasemap = (styleUrl: string) => {
                 if (!map) return;
                 map.setStyle(styleUrl);
         };
 
         return (
-                <div style={{
-                        position: "absolute",
-                        top: "150px",
-                        left: "10px",
-                        zIndex: 10,
-                        background: "white",
-                        padding: "10px",
-                        borderRadius: "6px",
-                        boxShadow: "0 2px 8px rgbz(0,0,0,0.25)",
-                        fontFamily: "Arial",
-                }}>
-                        <strong>Select Basemap</strong>
-                        {Object.entries(basemaps).map(([name, url]) => (
-                                <button key={name} onClick={() => {
-                                        changeBasemap(url)
-                                }} style={{
-                                        display: "block",
-                                        width: "100%",
-                                        marginTop: "6px",
-                                        padding: "5px 8px",
-                                        cursor: "pointer",
-                                }}>
-                                        {name}
-                                </button>
-                        ))}
+                <div style={toolContainer(50)}>
+                        <button style={toolButton(open)} onClick={onToggle}>Basemap</button>
+                        {open && (
+                                <div style={toolFlyout}>
+                                        <strong>Select Basemap</strong>
+                                        {Object.entries(basemaps).map(([name, url]) => (
+                                                <button key={name} onClick={() => changeBasemap(url)} style={{
+                                                        display: "block",
+                                                        width: "100%",
+                                                        marginTop: "6px",
+                                                        padding: "5px 8px",
+                                                        cursor: "pointer",
+                                                }}>
+                                                        {name}
+                                                </button>
+                                        ))}
+                                </div>
+                        )}
                 </div>
-        )
+        );
 }
 
 export default BasemapControl;

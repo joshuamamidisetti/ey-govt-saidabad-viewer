@@ -1,92 +1,61 @@
 import { useState } from "react";
 import type * as maplibregl from 'maplibre-gl';
+import { toolContainer, toolButton, toolFlyout } from "../toolStyles";
 
 interface LayerControlProps {
-        map:maplibregl.Map | null;
+        map: maplibregl.Map | null;
+        open: boolean;
+        onToggle: () => void;
 }
 
-function LayerControl({map}: LayerControlProps) {
+function LayerControl({ map, open, onToggle }: LayerControlProps) {
         const [layers, setLayers] = useState({
-                points: true,
-                lines: true,
-                polygons: true,
+                buildings: true,
+                slums: true,
+                roads: true,
+                boundary: true,
         });
 
         const toggleLayer = (
                 layerId: string,
-                key: "points" | "lines" | "polygons",
+                key: "buildings" | "slums" | "roads" | "boundary",
         ) => {
                 if (!map) return;
-
-                const newVisibility = layers[key] ? "none": "visible";
-
-                map.setLayoutProperty(
-                        layerId,
-                        "visibility",
-                        newVisibility
-                );
-                setLayers((previous) => ({
-                        ...previous,
-                        [key]: !previous[key],
-                }));
+                const newVisibility = layers[key] ? "none" : "visible";
+                map.setLayoutProperty(layerId, "visibility", newVisibility);
+                setLayers((previous) => ({ ...previous, [key]: !previous[key] }));
         };
 
         return (
-                <div
-                        style={{
-                                position: "absolute",
-                                top: "10px",
-                                left: "10px",
-                                zIndex: 10,
-                                background: "white",
-                                padding: "12px",
-                                borderRadius: "6px",
-                                boxShadow: "0 2px 8px rgba(0,0,0,0.25)",
-                                fontFamily: "Arial",
-                        }}
-                >
-                        <strong>Layers</strong>
-
-                        <label 
-                                style={{
-                                        display: "block",
-                                        marginTop: "10px",
-                                }}
-                        >
-                                <input 
-                                        type="checkbox"
-                                        checked={layers.points}
-                                        onChange={()=>toggleLayer("utility-points", "points")}
-                                />
-                                {" "} Utility Points
-                        </label>
-                        <label 
-                                style={{
-                                        display: "block",
-                                        marginTop: "10px",
-                                }}
-                        >
-                                <input 
-                                        type="checkbox"
-                                        checked={layers.lines}
-                                        onChange={()=>toggleLayer("power-lines", "lines")}
-                                />
-                                {" "}Utility Lines
-                        </label>
-                        <label style={{
-                                display: "block",
-                                marginTop: "8px"
-                        }}>
-                                <input 
-                                        type="checkbox"
-                                        checked={layers.polygons}
-                                        onChange={()=>toggleLayer("service-areas", "polygons")}
-                                />
-                                {" "}Service Areas
-                        </label>
+                <div style={toolContainer(10)}>
+                        <button style={toolButton(open)} onClick={onToggle}>Layers</button>
+                        {open && (
+                                <div style={toolFlyout}>
+                                        <strong>Layers</strong>
+                                        <label style={{ display: "block", marginTop: "10px" }}>
+                                                <input type="checkbox" checked={layers.buildings}
+                                                        onChange={() => toggleLayer("saidabad-buildings", "buildings")} />
+                                                {" "}Buildings
+                                        </label>
+                                        <label style={{ display: "block", marginTop: "10px" }}>
+                                                <input type="checkbox" checked={layers.slums}
+                                                        onChange={() => toggleLayer("saidabad-slums", "slums")} />
+                                                {" "}Slum Areas
+                                        </label>
+                                        <label style={{ display: "block", marginTop: "10px" }}>
+                                                <input type="checkbox" checked={layers.roads}
+                                                        onChange={() => toggleLayer("saidabad-roads", "roads")} />
+                                                {" "}Roads
+                                        </label>
+                                        <label style={{ display: "block", marginTop: "10px" }}>
+                                                <input type="checkbox" checked={layers.boundary}
+                                                        onChange={() => toggleLayer("saidabad-boundary", "boundary")} />
+                                                {" "}Ward Boundary
+                                        </label>
+                                </div>
+                        )}
                 </div>
-        )
-
-};
+        );
+}
 
 export default LayerControl;
