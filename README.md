@@ -4,6 +4,8 @@ An interactive web GIS application for **Saidabad ward (Ward 24, Malakpet Circle
 
 > ⚠️ **Data note:** Geometry is real (building footprints and roads from OpenStreetMap; ward boundary from GHMC). **All attributes are synthetic/dummy data** generated for this assignment and are clearly labelled via a `data_source` field on every feature.
 
+Access live web viewer at https://joshuamamidisetti.github.io/ey-govt-saidabad-viewer/
+
 ## Features
 
 - **Layers** — government buildings, slum areas, roads, and ward boundary, each toggleable
